@@ -1,0 +1,83 @@
+# Description of what this change includes
+# Revision number
+# Date
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS CloudFormation template to create a VPC in the US-West-2 region spanning 3 Availability Zones.
+
+Resources:
+  # VPC creation
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: "10.0.0.0/16"  # CIDR block for the VPC
+      EnableDnsSupport: true  # Enable DNS support for the VPC
+      EnableDnsHostnames: true  # Enable DNS hostnames for instances in the VPC
+      Tags:
+        - Key: Name
+          Value: "VPC-Javspe1657"  # Name tag for the VPC
+
+  # Subnets creation in 3 Availability Zones within the US-West-2 region
+  MySubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC  # Reference to the VPC
+      CidrBlock: "10.0.1.0/24"  # CIDR block for the subnet
+      AvailabilityZone: !Select [ 0, !GetAZs 'us-west-2' ]  # First AZ
+      MapPublicIpOnLaunch: true  # Automatically assign public IP to instances launched in this subnet
+      Tags:
+        - Key: Name
+          Value: "Subnet-1"
+
+  MySubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: "10.0.2.0/24"  # CIDR block for the subnet
+      AvailabilityZone: !Select [ 1, !GetAZs 'us-west-2' ]  # Second AZ
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: "Subnet-2"
+
+  MySubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: "10.0.3.0/24"  # CIDR block for the subnet
+      AvailabilityZone: !Select [ 2, !GetAZs 'us-west-2' ]  # Third AZ
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: "Subnet-3"
+
+  # Internet Gateway for the VPC
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: "VPC-Javspe1657-IGW"
+
+  # Attach the Internet Gateway to the VPC
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+Outputs:
+  VPCId:
+    Description: "VPC ID"
+    Value: !Ref MyVPC
+
+  Subnet1Id:
+    Description: "Subnet 1 ID"
+    Value: !Ref MySubnet1
+
+  Subnet2Id:
+    Description: "Subnet 2 ID"
+    Value: !Ref MySubnet2
+
+  Subnet3Id:
+    Description: "Subnet 3 ID"
+    Value: !Ref MySubnet3
